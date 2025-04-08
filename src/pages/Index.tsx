@@ -1,23 +1,41 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { LayoutDashboard, Monitor, Settings } from "lucide-react";
+import { LayoutDashboard, Monitor, Settings, LogOut } from "lucide-react";
 import QueueNumberGenerator from "@/components/QueueNumberGenerator";
 import CurrentServing from "@/components/CurrentServing";
+import { useAuth } from "@/context/AuthContext";
 
 const Index = () => {
+  const { isAdmin, logout } = useAuth();
+
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-primary">Sistem Antrian GA</h1>
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/admin">
-                <Settings className="mr-2 h-4 w-4" />
-                Admin
-              </Link>
-            </Button>
+            {isAdmin ? (
+              <>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/admin">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Admin
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" onClick={logout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/admin-login">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Admin
+                </Link>
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/display">
                 <Monitor className="mr-2 h-4 w-4" />

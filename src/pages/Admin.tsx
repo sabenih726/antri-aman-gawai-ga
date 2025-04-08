@@ -5,10 +5,12 @@ import { useQueue } from "@/context/QueueContext";
 import CounterCard from "@/components/CounterCard";
 import QueueStats from "@/components/QueueStats";
 import ServiceSelection from "@/components/ServiceSelection";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const Admin = () => {
   const { counters } = useQueue();
+  const { logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -23,6 +25,10 @@ const Admin = () => {
             </Button>
             <h1 className="text-2xl font-bold text-primary">Panel Admin</h1>
           </div>
+          <Button variant="outline" size="sm" onClick={logout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
         </div>
       </header>
 
