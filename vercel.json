@@ -1,12 +1,15 @@
 {
   "rewrites": [
     {
-      "source": "/admin/*",
+      "source": "/:match*",
       "destination": "/index.html"
-    },
+    }
+  ],
+  "cleanUrls": true,
+  "builds": [
     {
-      "source": "/display/*",
-      "destination": "/index.html"
+      "src": "index.html",
+      "use": "@vercel/static"
     }
   ]
 }
