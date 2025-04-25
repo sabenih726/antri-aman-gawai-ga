@@ -1,8 +1,11 @@
+/* Mengubah latar belakang dan warna teks untuk root */
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  background-color: var(--background); /* Kuning */
+  color: var(--foreground); /* Hitam */
 }
 
 /* Gaya untuk gambar logo */
@@ -10,17 +13,17 @@
   height: 6em;
   padding: 1.5em;
   will-change: filter;
-  transition: filter 300ms ease-in-out; /* Efek transisi saat hover */
+  transition: filter 300ms ease-in-out;
 }
 
 /* Efek hover pada logo dengan drop shadow */
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em var(--primary)); /* Kuning saat hover */
 }
 
-/* Efek hover khusus saat react logo di-hover */
+/* Efek hover khusus untuk logo React */
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em #61dafb); /* Efek khusus React */
 }
 
 /* Animasi rotasi logo */
@@ -33,7 +36,7 @@
   }
 }
 
-/* Mengaktifkan animasi spin jika pengguna memilih 'no-preference' pada pengaturan gerakan */
+/* Mengaktifkan animasi spin jika pengguna memilih 'no-preference' */
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
@@ -43,31 +46,33 @@
 /* Gaya untuk card */
 .card {
   padding: 2em;
+  background-color: var(--card); /* Putih */
+  color: var(--card-foreground); /* Hitam */
 }
 
 /* Gaya untuk teks dokumen */
 .read-the-docs {
-  color: #888;
+  color: var(--muted-foreground); /* Teks abu-abu */
 }
 
-/* Gaya tambahan untuk gambar logo di header (untuk gambar di pojok kiri atas) */
+/* Gaya tambahan untuk gambar logo di header */
 .header-logo {
-  width: 40px; /* Ukuran gambar, sesuaikan dengan desain */
-  height: 40px; /* Ukuran gambar, sesuaikan dengan desain */
-  object-fit: cover; /* Memastikan gambar tidak terdistorsi */
-  border-radius: 50%; /* Membuat gambar berbentuk lingkaran */
-  margin-right: 10px; /* Jarak antara gambar dan teks */
-  transition: transform 300ms ease; /* Efek transisi saat hover */
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-right: 10px;
+  transition: transform 300ms ease;
 }
 
 /* Efek hover pada gambar logo di header */
 .header-logo:hover {
-  transform: scale(1.1); /* Membesarkan gambar saat hover */
+  transform: scale(1.1);
 }
 
-/* Gaya untuk teks "Sistem Antrian GA" */
+/* Gaya untuk teks header */
 .header-title {
   font-size: 2rem;
   font-weight: bold;
-  color: #2d3748;
+  color: var(--primary); /* Kuning */
 }
