@@ -5,19 +5,25 @@
   text-align: center;
 }
 
+/* Gaya untuk gambar logo */
 .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
-  transition: filter 300ms;
+  transition: filter 300ms ease-in-out; /* Efek transisi saat hover */
 }
+
+/* Efek hover pada logo dengan drop shadow */
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
+/* Efek hover khusus saat react logo di-hover */
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
+/* Animasi rotasi logo */
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
@@ -27,16 +33,41 @@
   }
 }
 
+/* Mengaktifkan animasi spin jika pengguna memilih 'no-preference' pada pengaturan gerakan */
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
 }
 
+/* Gaya untuk card */
 .card {
   padding: 2em;
 }
 
+/* Gaya untuk teks dokumen */
 .read-the-docs {
   color: #888;
+}
+
+/* Gaya tambahan untuk gambar logo di header (untuk gambar di pojok kiri atas) */
+.header-logo {
+  width: 40px; /* Ukuran gambar, sesuaikan dengan desain */
+  height: 40px; /* Ukuran gambar, sesuaikan dengan desain */
+  object-fit: cover; /* Memastikan gambar tidak terdistorsi */
+  border-radius: 50%; /* Membuat gambar berbentuk lingkaran */
+  margin-right: 10px; /* Jarak antara gambar dan teks */
+  transition: transform 300ms ease; /* Efek transisi saat hover */
+}
+
+/* Efek hover pada gambar logo di header */
+.header-logo:hover {
+  transform: scale(1.1); /* Membesarkan gambar saat hover */
+}
+
+/* Gaya untuk teks "Sistem Antrian GA" */
+.header-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2d3748;
 }
