@@ -4,56 +4,47 @@
 
 @layer base {
   :root {
-    --background: #F7A800; /* Warna Kuning */
-    --foreground: #1D1D1B; /* Warna Hitam */
+    --background: 48 100% 50%; /* Kuning CAT */
+    --foreground: 0 0% 0%; /* Hitam */
 
-    --card: #FFFFFF; /* Warna Putih untuk latar belakang kartu */
-    --card-foreground: #1D1D1B; /* Warna teks hitam pada kartu */
+    --card: 0 0% 100%; /* Putih */
+    --card-foreground: 0 0% 0%; /* Hitam */
 
-    --primary: #F7A800; /* Warna utama kuning */
-    --primary-foreground: #1D1D1B; /* Warna teks hitam untuk elemen utama */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
 
-    --secondary: #1D1D1B; /* Warna sekunder hitam */
-    --secondary-foreground: #FFFFFF; /* Teks putih pada elemen sekunder */
+    --primary: 48 100% 50%; /* Kuning CAT */
+    --primary-foreground: 0 0% 0%; /* Hitam */
 
-    --muted: #F7A800; /* Warna kuning untuk elemen yang lebih lemah */
-    --muted-foreground: #1D1D1B; /* Teks hitam pada elemen muted */
+    --secondary: 0 0% 20%; /* Abu gelap */
+    --secondary-foreground: 0 0% 100%; /* Putih */
 
-    --accent: #F7A800; /* Warna aksen kuning */
-    --accent-foreground: #1D1D1B; /* Teks hitam pada aksen */
+    --muted: 0 0% 85%;
+    --muted-foreground: 0 0% 20%;
 
-    --destructive: #F7A800; /* Warna untuk tombol yang berbahaya */
-    --destructive-foreground: #1D1D1B; /* Teks hitam pada tombol yang berbahaya */
+    --accent: 0 0% 20%; /* Abu gelap */
+    --accent-foreground: 0 0% 100%;
 
-    --border: #1D1D1B; /* Warna border hitam */
-    --input: #F7A800; /* Warna input field kuning */
-    --ring: #F7A800; /* Warna focus ring kuning */
-  }
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
 
-  .dark {
-    --background: #1D1D1B; /* Background hitam untuk mode gelap */
-    --foreground: #F7A800; /* Teks kuning untuk mode gelap */
+    --border: 0 0% 70%;
+    --input: 0 0% 70%;
+    --ring: 48 100% 50%;
 
-    --card: #1D1D1B;
-    --card-foreground: #F7A800;
+    --radius: 0.5rem;
 
-    --primary: #1D1D1B;
-    --primary-foreground: #F7A800;
+    /* Sidebar khusus */
+    --sidebar-background: 0 0% 20%;
+    --sidebar-foreground: 0 0% 100%;
 
-    --secondary: #F7A800;
-    --secondary-foreground: #1D1D1B;
+    --sidebar-primary: 48 100% 50%;
+    --sidebar-primary-foreground: 0 0% 0%;
 
-    --muted: #1D1D1B;
-    --muted-foreground: #F7A800;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
 
-    --accent: #1D1D1B;
-    --accent-foreground: #F7A800;
-
-    --destructive: #F7A800;
-    --destructive-foreground: #1D1D1B;
-
-    --border: #F7A800;
-    --input: #1D1D1B;
-    --ring: #F7A800;
+    --sidebar-border: 0 0% 30%;
+    --sidebar-ring: 48 100% 50%;
   }
 }
