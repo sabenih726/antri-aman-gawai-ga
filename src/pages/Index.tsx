@@ -15,13 +15,13 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           {/* Flex container untuk gambar dan judul */}
           <div className="flex items-center space-x-4">
-            {/* Gambar di pojok kiri */}
+            {/* Gambar logo di pojok kiri */}
             <img
               src="/images/logo.png" // Pastikan gambar berada di folder public/images
               alt="Logo"
-              className="w-10 h-10 rounded-full" // Gaya untuk gambar (sesuaikan ukuran)
+              className="header-logo" // Menggunakan kelas header-logo dari CSS
             />
-            <h1 className="text-2xl font-bold text-primary">Sistem Antrian GA</h1>
+            <h1 className="header-title">Sistem Antrian GA</h1>
           </div>
 
           {/* Menu kanan */}
