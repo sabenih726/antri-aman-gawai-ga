@@ -13,7 +13,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
-// Rute yang hanya bisa diakses jika admin sudah login
+// ProtectedRoute: Hanya dapat diakses jika admin sudah login
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAdmin } = useAuth();
 
