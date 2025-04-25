@@ -13,7 +13,18 @@ const Index = () => {
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-primary">Sistem Antrian GA</h1>
+          {/* Flex container untuk gambar dan judul */}
+          <div className="flex items-center space-x-4">
+            {/* Gambar di pojok kiri */}
+            <img
+              src="/images/logo.png" // Pastikan gambar berada di folder public/images
+              alt="Logo"
+              className="w-10 h-10 rounded-full" // Gaya untuk gambar (sesuaikan ukuran)
+            />
+            <h1 className="text-2xl font-bold text-primary">Sistem Antrian GA</h1>
+          </div>
+
+          {/* Menu kanan */}
           <div className="flex space-x-2">
             {isAdmin ? (
               <>
