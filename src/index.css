@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    --background: #F7A800; /* Warna Kuning dari Trakindo */
-    --foreground: #1D1D1B; /* Warna Hitam dari Trakindo */
+    --background: #F7A800; /* Warna Kuning */
+    --foreground: #1D1D1B; /* Warna Hitam */
 
     --card: #FFFFFF; /* Warna Putih untuk latar belakang kartu */
     --card-foreground: #1D1D1B; /* Warna teks hitam pada kartu */
