@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,14 +13,14 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
-// Component pembungkus untuk rute yang memerlukan autentikasi
+// Rute yang hanya bisa diakses jika admin sudah login
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAdmin } = useAuth();
-  
+
   if (!isAdmin) {
     return <Navigate to="/admin-login" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
@@ -30,13 +29,13 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/admin-login" element={<AdminLogin />} />
-      <Route 
-        path="/admin" 
+      <Route
+        path="/admin"
         element={
           <ProtectedRoute>
             <Admin />
           </ProtectedRoute>
-        } 
+        }
       />
       <Route path="/display" element={<Display />} />
       <Route path="*" element={<NotFound />} />
