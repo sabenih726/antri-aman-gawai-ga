@@ -1,11 +1,11 @@
-/* Mengubah latar belakang dan warna teks untuk root */
+/* Mengatur tampilan root dengan latar belakang kuning dan teks hitam */
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-  background-color: var(--background); /* Kuning */
-  color: var(--foreground); /* Hitam */
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
 
 /* Gaya untuk gambar logo */
@@ -16,14 +16,14 @@
   transition: filter 300ms ease-in-out;
 }
 
-/* Efek hover pada logo dengan drop shadow */
+/* Efek hover pada logo */
 .logo:hover {
-  filter: drop-shadow(0 0 2em var(--primary)); /* Kuning saat hover */
+  filter: drop-shadow(0 0 2em hsl(var(--primary)));
 }
 
 /* Efek hover khusus untuk logo React */
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafb); /* Efek khusus React */
+  filter: drop-shadow(0 0 2em #61dafb);
 }
 
 /* Animasi rotasi logo */
@@ -36,7 +36,7 @@
   }
 }
 
-/* Mengaktifkan animasi spin jika pengguna memilih 'no-preference' */
+/* Mengaktifkan animasi spin jika preferensi motion tidak dikurangi */
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
@@ -46,16 +46,16 @@
 /* Gaya untuk card */
 .card {
   padding: 2em;
-  background-color: var(--card); /* Putih */
-  color: var(--card-foreground); /* Hitam */
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
 }
 
 /* Gaya untuk teks dokumen */
 .read-the-docs {
-  color: var(--muted-foreground); /* Teks abu-abu */
+  color: hsl(var(--muted-foreground));
 }
 
-/* Gaya tambahan untuk gambar logo di header */
+/* Logo kecil di header */
 .header-logo {
   width: 40px;
   height: 40px;
@@ -65,14 +65,14 @@
   transition: transform 300ms ease;
 }
 
-/* Efek hover pada gambar logo di header */
+/* Efek hover pada logo header */
 .header-logo:hover {
   transform: scale(1.1);
 }
 
-/* Gaya untuk teks header */
+/* Judul di header */
 .header-title {
   font-size: 2rem;
   font-weight: bold;
-  color: var(--primary); /* Kuning */
+  color: hsl(var(--primary));
 }
