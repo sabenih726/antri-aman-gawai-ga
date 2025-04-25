@@ -12,7 +12,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Daftar akun admin (bisa dikembangkan ke backend nantinya)
 const ADMIN_USERS = [
   { username: "Rizki", password: "admin123" },
-  { username: "Oki", password: "admin456" },
+  { username: "Lely", password: "12345" },
 ];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
