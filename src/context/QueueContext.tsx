@@ -59,8 +59,6 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Initial services
   const [services, setServices] = useState<ServiceType[]>([
     { id: "general", name: "Pelayanan Umum", prefix: "A", currentNumber: 0, served: 0, waiting: 0 },
-    { id: "procurement", name: "Pengadaan", prefix: "B", currentNumber: 0, served: 0, waiting: 0 },
-    { id: "maintenance", name: "Pemeliharaan", prefix: "C", currentNumber: 0, served: 0, waiting: 0 },
     { id: "facility", name: "Fasilitas", prefix: "D", currentNumber: 0, served: 0, waiting: 0 },
   ]);
 
