@@ -9,6 +9,7 @@ export type ServiceType = {
   currentNumber: number;
   served: number;
   waiting: number;
+  averageWaitTime?: number; // Waktu tunggu rata-rata dalam menit
 };
 
 // Counter status
@@ -28,6 +29,7 @@ export type QueueTicket = {
   status: "waiting" | "serving" | "completed";
   timestamp: Date;
   counterAssigned?: number;
+  completedTimestamp?: Date;
 };
 
 type QueueContextType = {
@@ -43,6 +45,7 @@ type QueueContextType = {
   getTicketPosition: (ticketId: string) => number | null;
   getAllWaitingTickets: () => QueueTicket[];
   getServiceByPrefix: (prefix: string) => ServiceType | undefined;
+  getLastTicket: () => QueueTicket | null;
 };
 
 const QueueContext = createContext<QueueContextType | undefined>(undefined);
@@ -58,8 +61,24 @@ export const useQueue = () => {
 export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Initial services
   const [services, setServices] = useState<ServiceType[]>([
-    { id: "general", name: "Pelayanan Umum", prefix: "A", currentNumber: 0, served: 0, waiting: 0 },
-    { id: "facility", name: "Fasilitas", prefix: "D", currentNumber: 0, served: 0, waiting: 0 },
+    { 
+      id: "general", 
+      name: "Pelayanan Umum", 
+      prefix: "A", 
+      currentNumber: 0, 
+      served: 0, 
+      waiting: 0,
+      averageWaitTime: 5 
+    },
+    { 
+      id: "facility", 
+      name: "Fasilitas", 
+      prefix: "D", 
+      currentNumber: 0, 
+      served: 0, 
+      waiting: 0,
+      averageWaitTime: 8 
+    },
   ]);
 
   // Initial counters
@@ -94,8 +113,11 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const newNumber = service.currentNumber + 1;
     const ticketNumber = `${service.prefix}${newNumber.toString().padStart(3, '0')}`;
     
+    // Buat ID yang unik untuk tiket ini
+    const ticketId = `${serviceType}-${Date.now()}`;
+    
     const newTicket: QueueTicket = {
-      id: `${serviceType}-${Date.now()}`,
+      id: ticketId,
       number: ticketNumber,
       serviceType: serviceType,
       status: "waiting",
@@ -133,7 +155,7 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setCounters(prev => 
       prev.map(counter => 
         counter.id === counterId 
-          ? { ...counter, currentlyServing: nextTicket.number } 
+          ? { ...counter, currentlyServing: nextTicket.number, serviceType: serviceType } 
           : counter
       )
     );
@@ -158,7 +180,9 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Update ticket
     setQueue(prev => 
       prev.map(t => 
-        t.id === ticketId ? { ...t, status: "completed" } : t
+        t.id === ticketId 
+          ? { ...t, status: "completed", completedTimestamp: new Date() } 
+          : t
       )
     );
 
@@ -222,6 +246,12 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return services.find(service => service.prefix === prefix);
   };
 
+  // Get last ticket that was added
+  const getLastTicket = (): QueueTicket | null => {
+    if (queue.length === 0) return null;
+    return queue[queue.length - 1];
+  };
+
   const value = {
     services,
     counters,
@@ -234,7 +264,8 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     getWaitingCount,
     getTicketPosition,
     getAllWaitingTickets,
-    getServiceByPrefix
+    getServiceByPrefix,
+    getLastTicket
   };
 
   return <QueueContext.Provider value={value}>{children}</QueueContext.Provider>;
