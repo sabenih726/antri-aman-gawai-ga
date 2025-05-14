@@ -10,15 +10,20 @@ const QueueStatistics = () => {
   const pieData = services.map(service => ({
     name: service.name,
     value: service.served + service.waiting,
-    color: getRandomColor(service.id)
+    color: getRandomColor(parseInt(service.id))
   }));
   
   // Data untuk grafik batang waktu tunggu rata-rata
-  const barData = services.map(service => ({
-    name: service.name,
-    averageWait: service.averageWaitTime || Math.floor(Math.random() * 10) + 5, // Simulasi data waktu tunggu
-    color: getRandomColor(service.id)
-  }));
+  const barData = services.map(service => {
+    // Simulate average wait time since it's not in the ServiceType
+    const averageWait = Math.floor(Math.random() * 10) + 5;
+    
+    return {
+      name: service.name,
+      averageWait: averageWait,
+      color: getRandomColor(parseInt(service.id))
+    };
+  });
   
   // Total tiket yang sudah dilayani dan yang masih menunggu
   const totalServed = services.reduce((acc, service) => acc + service.served, 0);
