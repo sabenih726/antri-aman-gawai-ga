@@ -1,5 +1,6 @@
 
-import { useQueue, QueueTicket as TicketType } from "@/context/QueueContext";
+import { useQueue } from "@/context/QueueContext";
+import { QueueTicket as TicketType } from "@/types/queueTypes";
 import { Card, CardContent } from "@/components/ui/card";
 import { Ticket, Clock } from "lucide-react";
 

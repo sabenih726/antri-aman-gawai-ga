@@ -2,7 +2,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useQueue, Counter } from "@/context/QueueContext";
+import { useQueue } from "@/context/QueueContext";
+import { Counter } from "@/types/queueTypes";
 import { UserCheck, UserX, Users } from "lucide-react";
 
 interface CounterCardProps {
