@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQueue } from "@/context/QueueContext";
 import { ServiceType } from "@/types/queueTypes";
-import { CheckCircle, Ticket, RefreshCw } from "lucide-react";
-import { useState, useEffect } from "react";
+import { CheckCircle, Ticket } from "lucide-react";
+import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -24,21 +24,6 @@ const QueueNumberGenerator: React.FC<QueueNumberGeneratorProps> = ({
   const [ticketId, setTicketId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  // Refresh state from localStorage when needed
-  useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'queue_tickets' && ticketId) {
-        // If we have a ticket, check its position again after data updates
-        const position = getTicketPosition(ticketId);
-        // Re-render component with updated position
-        setTicketId(ticketId);
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [getTicketPosition, ticketId]);
 
   const handleGenerateTicket = (serviceId: string) => {
     setSelectedService(serviceId);
@@ -60,16 +45,6 @@ const QueueNumberGenerator: React.FC<QueueNumberGeneratorProps> = ({
         title: "Nomor Antrian Berhasil",
         description: `Nomor antrian Anda adalah ${number}`,
       });
-
-      // Trigger a storage event to notify other tabs
-      const storageEventInit: StorageEventInit = {
-        key: 'queue_tickets',
-        newValue: localStorage.getItem('queue_tickets'),
-        oldValue: null,
-        storageArea: localStorage,
-        url: window.location.href
-      };
-      window.dispatchEvent(new StorageEvent('storage', storageEventInit));
     }
   };
 
@@ -81,20 +56,6 @@ const QueueNumberGenerator: React.FC<QueueNumberGeneratorProps> = ({
 
   const handleViewDisplay = () => {
     navigate('/display');
-  };
-  
-  const handleRefresh = () => {
-    if (ticketId) {
-      // Force a refresh of the position
-      const position = getTicketPosition(ticketId);
-      // Re-render component with updated position
-      setTicketId(prevId => prevId ? `${prevId}` : null);
-      
-      toast({
-        title: "Data Diperbarui",
-        description: "Posisi antrian telah diperbarui dengan data terbaru"
-      });
-    }
   };
 
   const position = ticketId ? getTicketPosition(ticketId) : null;
@@ -128,10 +89,6 @@ const QueueNumberGenerator: React.FC<QueueNumberGeneratorProps> = ({
             </Button>
             <Button onClick={handleViewDisplay} variant="outline">
               Lihat Display
-            </Button>
-            <Button onClick={handleRefresh} variant="outline" className="flex items-center gap-1">
-              <RefreshCw className="h-4 w-4" />
-              Refresh
             </Button>
           </div>
         </CardContent>

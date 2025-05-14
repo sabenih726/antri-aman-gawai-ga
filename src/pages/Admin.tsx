@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useQueue } from "@/context/QueueContext";
@@ -14,57 +13,21 @@ import { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
 
 const Admin = () => {
-  const { counters, services, queue, callNext, completeService } = useQueue();
+  const { counters, services, queue, callNext, completeService, getWaitingCount } = useQueue();
   const { logout, getCurrentUser } = useAuth();
   const [selectedTab, setSelectedTab] = useState("dashboard");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const { toast } = useToast();
 
-  // Refresh setiap 5 detik untuk mendapatkan data terbaru
+  // Refresh setiap 10 detik
   useEffect(() => {
     const timer = setInterval(() => {
       setRefreshTrigger(prev => prev + 1);
-      
-      // Force localStorage reload by triggering a storage event
-      const forceRefresh = () => {
-        const storageEventInit: StorageEventInit = {
-          key: 'queue_tickets',
-          newValue: localStorage.getItem('queue_tickets'),
-          oldValue: null,
-          storageArea: localStorage,
-          url: window.location.href
-        };
-        window.dispatchEvent(new StorageEvent('storage', storageEventInit));
-      };
-      
-      forceRefresh();
-    }, 5000);
+    }, 10000);
     
     return () => clearInterval(timer);
   }, []);
-
-  const handleManualRefresh = () => {
-    // Force reload by triggering refresh for all storage keys
-    ['queue_services', 'queue_counters', 'queue_tickets'].forEach(key => {
-      const storageEventInit: StorageEventInit = {
-        key,
-        newValue: localStorage.getItem(key),
-        oldValue: null,
-        storageArea: localStorage,
-        url: window.location.href
-      };
-      window.dispatchEvent(new StorageEvent('storage', storageEventInit));
-    });
-    
-    setRefreshTrigger(prev => prev + 1);
-    toast({
-      title: "Data Diperbarui",
-      description: "Data antrian telah diperbarui dengan data terbaru",
-    });
-  };
 
   // Mendapatkan tiket yang sedang menunggu
   const waitingTickets = queue.filter(ticket => ticket.status === "waiting")
@@ -77,26 +40,17 @@ const Admin = () => {
   const handleCallNext = (counterId: number, serviceType: string) => {
     const nextTicket = callNext(counterId, serviceType);
     if (nextTicket) {
-      toast({
-        title: "Nomor Antrian Dipanggil",
-        description: `Memanggil nomor ${nextTicket.number} ke counter ${counterId}`,
-      });
+      // Tampilkan notifikasi atau feedback visual
+      console.log(`Memanggil nomor ${nextTicket.number} ke counter ${counterId}`);
     } else {
-      toast({
-        title: "Tidak Ada Antrian",
-        description: `Tidak ada tiket yang menunggu untuk layanan yang dipilih`,
-        variant: "destructive",
-      });
+      console.log(`Tidak ada tiket yang menunggu untuk layanan ${serviceType}`);
     }
   };
 
   // Handler untuk menandai tiket selesai dilayani
   const handleCompleteService = (ticketId: string) => {
     completeService(ticketId);
-    toast({
-      title: "Layanan Selesai",
-      description: "Tiket telah selesai dilayani",
-    });
+    console.log(`Tiket ${ticketId} telah selesai dilayani`);
   };
 
   return (
@@ -176,23 +130,20 @@ const Admin = () => {
 
           <main className="container mx-auto px-4 py-8">
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-              <div className="flex items-center justify-between">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-                  <TabsTrigger value="queue">Antrian</TabsTrigger>
-                  <TabsTrigger value="statistics">Statistik</TabsTrigger>
-                  <TabsTrigger value="counters">Loket</TabsTrigger>
-                </TabsList>
-                
-                <Button size="sm" variant="outline" onClick={handleManualRefresh} className="flex items-center gap-2">
-                  <RefreshCw className="h-4 w-4" />
-                  Refresh Data
-                </Button>
-              </div>
+              <TabsList className="mb-4">
+                <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                <TabsTrigger value="queue">Antrian</TabsTrigger>
+                <TabsTrigger value="statistics">Statistik</TabsTrigger>
+                <TabsTrigger value="counters">Loket</TabsTrigger>
+              </TabsList>
               
               <TabsContent value="dashboard" className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h1 className="text-2xl font-bold">Dashboard Admin</h1>
+                  <Button size="sm" variant="outline" onClick={() => setRefreshTrigger(prev => prev + 1)}>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh Data
+                  </Button>
                 </div>
                 <QueueStats />
                 <QueueStatistics />
@@ -202,6 +153,10 @@ const Admin = () => {
                 <Card className="p-6">
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-semibold">Manajemen Antrian</h2>
+                    <Button size="sm" variant="outline" onClick={() => setRefreshTrigger(prev => prev + 1)}>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Refresh Antrian
+                    </Button>
                   </div>
                   
                   <div className="space-y-6">

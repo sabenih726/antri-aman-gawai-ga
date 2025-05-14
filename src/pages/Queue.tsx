@@ -1,62 +1,24 @@
 
 import { useState, useEffect } from "react";
 import { useQueue } from "@/context/QueueContext";
+import { ServiceType } from "@/types/queueTypes";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import QueueNumberGenerator from "@/components/QueueNumberGenerator";
-import { ArrowLeft, Clock, Users, RefreshCw } from "lucide-react";
+import { ArrowLeft, Clock, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
 
 const Queue = () => {
   const { getAllWaitingTickets, services, getTicketPosition } = useQueue();
   const [ticketNumber, setTicketNumber] = useState<string | null>(null);
   const [waitingCount, setWaitingCount] = useState<number>(0);
-  const { toast } = useToast();
   
-  // Function to refresh data manually
-  const handleRefresh = () => {
-    // Force reload by triggering storage events
-    ['queue_services', 'queue_counters', 'queue_tickets'].forEach(key => {
-      const storageEventInit: StorageEventInit = {
-        key,
-        newValue: localStorage.getItem(key),
-        oldValue: null,
-        storageArea: localStorage,
-        url: window.location.href
-      };
-      window.dispatchEvent(new StorageEvent('storage', storageEventInit));
-    });
-    
-    // Update waiting count from latest data
-    setWaitingCount(getAllWaitingTickets().length);
-    
-    toast({
-      title: "Data Diperbarui",
-      description: "Data antrian telah diperbarui dengan data terbaru"
-    });
-  };
-  
-  // Update waiting count setiap 5 detik
+  // Update waiting count setiap 10 detik
   useEffect(() => {
     const timer = setInterval(() => {
       setWaitingCount(getAllWaitingTickets().length);
-      
-      // Force a storage event to sync data across tabs
-      const forceRefresh = () => {
-        const storageEventInit: StorageEventInit = {
-          key: 'queue_tickets',
-          newValue: localStorage.getItem('queue_tickets'),
-          oldValue: null,
-          storageArea: localStorage,
-          url: window.location.href
-        };
-        window.dispatchEvent(new StorageEvent('storage', storageEventInit));
-      };
-      
-      forceRefresh();
-    }, 5000);
+    }, 10000);
     
     // Initial count
     setWaitingCount(getAllWaitingTickets().length);
@@ -68,24 +30,12 @@ const Queue = () => {
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center mb-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Kembali ke Beranda
-              </Link>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex items-center gap-2"
-              onClick={handleRefresh}
-            >
-              <RefreshCw className="h-4 w-4" />
-              Refresh
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" asChild className="mb-4">
+            <Link to="/">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Kembali ke Beranda
+            </Link>
+          </Button>
           <h1 className="text-2xl font-bold text-primary mb-2">Sistem Antrian</h1>
           <div className="flex space-x-4">
             <Badge variant="outline" className="flex items-center gap-1 py-1 px-3">

@@ -1,186 +1,162 @@
 
-import React, { useEffect, useState } from "react";
-import { useQueue } from "@/context/QueueContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import CurrentServing from "@/components/CurrentServing";
 import { Link } from "react-router-dom";
-import { ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useQueue } from "@/context/QueueContext";
+import { ServiceType } from "@/types/queueTypes";
+import { Card } from "@/components/ui/card";
+import { Clock, ArrowLeft, Volume2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Display = () => {
-  const { queue, counters, services } = useQueue();
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const { toast } = useToast();
-
-  // Automatically refresh data every 5 seconds
+  const { counters, services } = useQueue();
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [lastCalled, setLastCalled] = useState<string | null>(null);
+  
+  // Update the clock every minute
   useEffect(() => {
     const timer = setInterval(() => {
-      setRefreshTrigger(prev => prev + 1);
-      
-      // Force a storage event to sync data across tabs
-      const forceRefresh = () => {
-        ['queue_services', 'queue_counters', 'queue_tickets'].forEach(key => {
-          const storageEventInit: StorageEventInit = {
-            key,
-            newValue: localStorage.getItem(key),
-            oldValue: null,
-            storageArea: localStorage,
-            url: window.location.href
-          };
-          window.dispatchEvent(new StorageEvent('storage', storageEventInit));
-        });
-      };
-      
-      forceRefresh();
-    }, 5000);
+      setCurrentTime(new Date());
+    }, 60000);
     
     return () => clearInterval(timer);
   }, []);
-
-  // Manual refresh
-  const handleRefresh = () => {
-    // Force reload by triggering storage events
-    ['queue_services', 'queue_counters', 'queue_tickets'].forEach(key => {
-      const storageEventInit: StorageEventInit = {
-        key,
-        newValue: localStorage.getItem(key),
-        oldValue: null,
-        storageArea: localStorage,
-        url: window.location.href
-      };
-      window.dispatchEvent(new StorageEvent('storage', storageEventInit));
-    });
+  
+  // Format the current date and time
+  const formattedDate = new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(currentTime);
+  
+  const formattedTime = new Intl.DateTimeFormat('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(currentTime);
+  
+  // Get active counters that are serving someone
+  const activeCounters = counters.filter(
+    counter => counter.status === "active" && counter.currentlyServing
+  );
+  
+  // Watch for changes in counters to detect newly called numbers
+  useEffect(() => {
+    const currentServing = activeCounters.map(c => c.currentlyServing);
+    const latestCalled = currentServing[currentServing.length - 1];
     
-    setRefreshTrigger(prev => prev + 1);
-    toast({
-      title: "Data Diperbarui",
-      description: "Display antrian telah diperbarui dengan data terbaru"
-    });
-  };
-
-  // Get serving tickets
-  const servingTickets = queue
-    .filter(ticket => ticket.status === "serving")
-    .map(ticket => {
-      const counter = counters.find(c => c.id === ticket.counterAssigned);
-      const service = services.find(s => s.id === ticket.serviceType);
-      return { ...ticket, counterName: counter?.name || "", serviceName: service?.name || "" };
-    });
-
-  // Get waiting tickets (limited to 10)
-  const waitingTickets = queue
-    .filter(ticket => ticket.status === "waiting")
-    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-    .slice(0, 10);
+    if (latestCalled && latestCalled !== lastCalled) {
+      setLastCalled(latestCalled);
+      
+      // Text-to-speech announcement
+      if ('speechSynthesis' in window) {
+        const counter = activeCounters[activeCounters.length - 1];
+        const serviceName = counter.serviceType && 
+          services.find(s => s.id === counter.serviceType)?.name;
+        
+        const announcement = `Nomor antrian ${latestCalled}, silakan menuju ke ${counter.name} untuk layanan ${serviceName || ''}`;
+        const speech = new SpeechSynthesisUtterance(announcement);
+        speech.lang = 'id-ID';
+        window.speechSynthesis.speak(speech);
+      }
+    }
+  }, [activeCounters, lastCalled, services]);
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-primary text-white py-4 px-6 flex justify-between items-center">
-        <div className="flex items-center">
-          <h1 className="text-2xl font-bold">Display Antrian</h1>
-          <div className="text-sm ml-6">
-            {new Date().toLocaleDateString("id-ID", { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric'
-            })}
+      <header className="bg-primary text-white shadow-md">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+          <div className="flex items-center">
+            <Button variant="ghost" size="sm" asChild className="mr-4 text-white hover:text-white hover:bg-primary/90">
+              <Link to="/">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Kembali
+              </Link>
+            </Button>
+            <h1 className="text-2xl font-bold">Display Antrian</h1>
           </div>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <Button variant="secondary" size="sm" onClick={handleRefresh} className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </Button>
-          
-          <Button variant="secondary" size="sm" asChild>
-            <Link to="/">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Kembali
-            </Link>
-          </Button>
+          <div className="flex items-center">
+            <Clock className="h-5 w-5 mr-2" />
+            <div>
+              <div className="text-sm font-medium">{formattedDate}</div>
+              <div className="text-lg font-bold">{formattedTime}</div>
+            </div>
+          </div>
         </div>
       </header>
 
-      <main className="container mx-auto py-8">
-        <div className="grid gap-8">
-          <CurrentServing />
+      <main className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 gap-8">
+          {/* Last called number animation */}
+          <AnimatePresence mode="wait">
+            {lastCalled && (
+              <motion.div
+                key={lastCalled}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                className="bg-white p-6 rounded-lg shadow-lg border-2 border-primary text-center"
+              >
+                <div className="flex items-center justify-center mb-2">
+                  <Volume2 className="h-6 w-6 text-primary mr-2" />
+                  <h2 className="text-xl font-semibold">Nomor Terpanggil</h2>
+                </div>
+                <div className="text-6xl font-bold text-primary my-4">{lastCalled}</div>
+                <div className="text-gray-600">
+                  {activeCounters.length > 0 && 
+                    activeCounters.find(c => c.currentlyServing === lastCalled)?.name}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader className="bg-blue-50 border-b">
-                <CardTitle className="text-lg text-blue-800">Daftar Menunggu</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="divide-y">
-                  {waitingTickets.length > 0 ? (
-                    waitingTickets.map((ticket, index) => {
-                      const service = services.find(s => s.id === ticket.serviceType);
-                      return (
-                        <div 
-                          key={ticket.id} 
-                          className={`p-4 flex items-center justify-between ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-                        >
-                          <div>
-                            <span className="font-medium text-primary">{ticket.number}</span>
-                            <span className="text-gray-500 text-sm ml-2">
-                              ({service?.name || ticket.serviceType})
-                            </span>
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {new Date(ticket.timestamp).toLocaleTimeString()}
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="p-6 text-center text-gray-500">
-                      Tidak ada antrian yang menunggu
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+          <Card className="overflow-hidden border-0 shadow-lg">
+            <div className="bg-primary text-white p-4 text-center">
+              <h2 className="text-2xl font-bold">NOMOR ANTRIAN YANG SEDANG DILAYANI</h2>
+            </div>
             
-            <Card>
-              <CardHeader className="bg-green-50 border-b">
-                <CardTitle className="text-lg text-green-800">Status Counter</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="divide-y">
-                  {counters.map((counter, index) => {
-                    const serviceInfo = counter.serviceType 
-                      ? services.find(s => s.id === counter.serviceType)?.name
-                      : "Semua layanan";
-                    
-                    return (
-                      <div 
-                        key={counter.id} 
-                        className={`p-4 flex justify-between items-center ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-                      >
-                        <div>
-                          <div className="font-medium">{counter.name}</div>
-                          <div className="text-sm text-gray-500">{serviceInfo}</div>
-                        </div>
-                        <div>
-                          {counter.status === "active" ? (
-                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                              Aktif
-                            </span>
-                          ) : (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-                              Nonaktif
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 p-6">
+              {activeCounters.length > 0 ? (
+                activeCounters.map((counter) => (
+                  <motion.div
+                    key={counter.id}
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-white rounded-lg shadow-md p-4 text-center"
+                  >
+                    <div className="text-gray-600 text-lg mb-2">{counter.name}</div>
+                    <div className="text-5xl font-bold text-primary my-4">
+                      {counter.currentlyServing}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {counter.serviceType && services.find(s => s.id === counter.serviceType)?.name}
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="col-span-4 text-center py-12 text-gray-500">
+                  <p className="text-2xl">Tidak ada antrian yang sedang dilayani</p>
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
+          </Card>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {services.map((service) => (
+              <motion.div key={service.id} whileHover={{ y: -5 }}>
+                <Card className="overflow-hidden h-full">
+                  <div className="bg-secondary p-3">
+                    <h3 className="font-semibold">{service.name}</h3>
+                  </div>
+                  <div className="p-4 text-center">
+                    <div className="text-sm text-gray-500 mb-1">Menunggu</div>
+                    <div className="text-3xl font-bold">{service.waiting}</div>
+                    <div className="mt-2 text-xs text-gray-400">
+                      Sudah dilayani: {service.served || 0}
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
       </main>
