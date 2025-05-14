@@ -1,14 +1,20 @@
+
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-  server: {
-    historyApiFallback: true // <- tambahkan ini jika develop di lokal
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
   },
-  build: {
-    rollupOptions: {
-      input: 'index.html'
-    }
+  server: {
+    port: 8080,
+    historyApiFallback: true
+  },
+  preview: {
+    port: 8080
   }
 })
