@@ -2,7 +2,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useQueue, ServiceType } from "@/context/QueueContext";
+import { useQueue } from "@/context/QueueContext";
+import { ServiceType } from "@/types/queueTypes";
 import { CheckCircle, Ticket } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";

@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useQueue } from "@/context/QueueContext";
+import { ServiceType } from "@/types/queueTypes";
 import { Card } from "@/components/ui/card";
 import { Clock, ArrowLeft, Volume2 } from "lucide-react";
 import { useEffect, useState } from "react";
