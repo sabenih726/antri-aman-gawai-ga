@@ -1,6 +1,5 @@
 
 import { useQueue } from "@/context/QueueContext";
-import { ServiceType } from "@/types/queueTypes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Users } from "lucide-react";

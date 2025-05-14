@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +8,6 @@ import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
 import Display from "./pages/Display";
 import NotFound from "./pages/NotFound";
-import Queue from "./pages/Queue";
 import { QueueProvider } from "./context/QueueContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
@@ -30,7 +28,6 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
-      <Route path="/queue" element={<Queue />} />
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route
         path="/admin"
