@@ -28,15 +28,22 @@ export type QueueTicket = {
   status: "waiting" | "serving" | "completed";
   timestamp: Date;
   counterAssigned?: number;
+  customerName?: string;
+  purpose?: string;
+  priority: "normal" | "urgent" | "vip";
+  estimatedWaitTime?: number;
+  calledAt?: Date;
+  completedAt?: Date;
+  notes?: string;
 };
 
 type QueueContextType = {
   services: ServiceType[];
   counters: Counter[];
   queue: QueueTicket[];
-  addToQueue: (serviceType: string) => string;
+  addToQueue: (serviceType: string, customerName?: string, purpose?: string, priority?: "normal" | "urgent" | "vip") => string;
   callNext: (counterId: number, serviceType: string) => QueueTicket | null;
-  completeService: (ticketId: string) => void;
+  completeService: (ticketId: string, notes?: string) => void;
   setCounterStatus: (counterId: number, status: "active" | "inactive") => void;
   setCounterService: (counterId: number, serviceType: string | null) => void;
   getWaitingCount: (serviceType: string) => number;
@@ -44,6 +51,9 @@ type QueueContextType = {
   getAllWaitingTickets: () => QueueTicket[];
   getServiceByPrefix: (prefix: string) => ServiceType | undefined;
   clearAllData: () => void;
+  getTicketById: (ticketId: string) => QueueTicket | undefined;
+  updateTicket: (ticketId: string, updates: Partial<QueueTicket>) => void;
+  getEstimatedWaitTime: (serviceType: string) => number;
 };
 
 const QueueContext = createContext<QueueContextType | undefined>(undefined);
@@ -206,12 +216,17 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [queue]);
 
   // Add new ticket to queue
-  const addToQueue = (serviceType: string): string => {
+  const addToQueue = (serviceType: string, customerName?: string, purpose?: string, priority: "normal" | "urgent" | "vip" = "normal"): string => {
     const service = services.find(s => s.id === serviceType);
     if (!service) return "";
 
     const newNumber = service.currentNumber + 1;
     const ticketNumber = `${service.prefix}${newNumber.toString().padStart(3, '0')}`;
+    
+    // Calculate estimated wait time
+    const waitingCount = getWaitingCount(serviceType);
+    const avgServiceTime = 5; // minutes per service (configurable)
+    const estimatedWait = waitingCount * avgServiceTime;
     
     const newTicket: QueueTicket = {
       id: `${serviceType}-${Date.now()}`,
@@ -219,9 +234,26 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       serviceType: serviceType,
       status: "waiting",
       timestamp: new Date(),
+      customerName,
+      purpose,
+      priority,
+      estimatedWaitTime: estimatedWait,
     };
     
-    setQueue(prev => [...prev, newTicket]);
+    // Sort by priority: vip > urgent > normal, then by timestamp
+    setQueue(prev => {
+      const newQueue = [...prev, newTicket];
+      return newQueue.sort((a, b) => {
+        if (a.status !== "waiting" || b.status !== "waiting") return 0;
+        
+        const priorityOrder = { vip: 3, urgent: 2, normal: 1 };
+        const aPriority = priorityOrder[a.priority];
+        const bPriority = priorityOrder[b.priority];
+        
+        if (aPriority !== bPriority) return bPriority - aPriority;
+        return a.timestamp.getTime() - b.timestamp.getTime();
+      });
+    });
     
     // Update the service's current number
     setServices(prev => 
@@ -243,7 +275,7 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setQueue(prev => 
       prev.map(ticket => 
         ticket.id === nextTicket.id 
-          ? { ...ticket, status: "serving", counterAssigned: counterId } 
+          ? { ...ticket, status: "serving", counterAssigned: counterId, calledAt: new Date() } 
           : ticket
       )
     );
@@ -270,14 +302,14 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Complete current service at counter
-  const completeService = (ticketId: string) => {
+  const completeService = (ticketId: string, notes?: string) => {
     const ticket = queue.find(t => t.id === ticketId);
     if (!ticket || ticket.status !== "serving") return;
 
     // Update ticket
     setQueue(prev => 
       prev.map(t => 
-        t.id === ticketId ? { ...t, status: "completed" } : t
+        t.id === ticketId ? { ...t, status: "completed", completedAt: new Date(), notes } : t
       )
     );
 
@@ -341,6 +373,27 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return services.find(service => service.prefix === prefix);
   };
 
+  // Get ticket by ID
+  const getTicketById = (ticketId: string): QueueTicket | undefined => {
+    return queue.find(ticket => ticket.id === ticketId);
+  };
+
+  // Update ticket
+  const updateTicket = (ticketId: string, updates: Partial<QueueTicket>) => {
+    setQueue(prev => 
+      prev.map(ticket => 
+        ticket.id === ticketId ? { ...ticket, ...updates } : ticket
+      )
+    );
+  };
+
+  // Get estimated wait time for service
+  const getEstimatedWaitTime = (serviceType: string): number => {
+    const waitingCount = getWaitingCount(serviceType);
+    const avgServiceTime = 5; // minutes per service
+    return waitingCount * avgServiceTime;
+  };
+
   // Clear all data (for admin reset)
   const clearAllData = () => {
     const initialServices = [
@@ -377,7 +430,10 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     getTicketPosition,
     getAllWaitingTickets,
     getServiceByPrefix,
-    clearAllData
+    clearAllData,
+    getTicketById,
+    updateTicket,
+    getEstimatedWaitTime
   };
 
   return <QueueContext.Provider value={value}>{children}</QueueContext.Provider>;

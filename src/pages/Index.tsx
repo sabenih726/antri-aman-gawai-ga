@@ -1,9 +1,12 @@
 
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
-import { LayoutDashboard, Monitor, Settings, LogOut, RefreshCw } from "lucide-react";
+import { LayoutDashboard, Monitor, Settings, LogOut, RefreshCw, Ticket, History } from "lucide-react";
 import QueueNumberGenerator from "@/components/QueueNumberGenerator";
 import CurrentServing from "@/components/CurrentServing";
+import TicketHistory from "@/components/TicketHistory";
+import TicketTracker from "@/components/TicketTracker";
 import { useAuth } from "@/context/AuthContext";
 import { useQueue } from "@/context/QueueContext";
 import { useState, useEffect } from "react";
@@ -87,11 +90,50 @@ const Index = () => {
                 <li>Perhatikan nomor counter yang memanggil Anda</li>
                 <li>Mohon untuk tidak meninggalkan area tunggu ketika menunggu</li>
               </ul>
+              
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 gap-4 mt-6">
+                <div className="text-center p-3 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">{queue.filter(t => t.status === "waiting").length}</div>
+                  <div className="text-sm text-blue-600">Menunggu</div>
+                </div>
+                <div className="text-center p-3 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">{queue.filter(t => t.status === "serving").length}</div>
+                  <div className="text-sm text-green-600">Dilayani</div>
+                </div>
+              </div>
             </div>
           </div>
           
           <div>
-            <QueueNumberGenerator />
+            <Tabs defaultValue="new-ticket" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="new-ticket" className="flex items-center">
+                  <Ticket className="mr-2 h-4 w-4" />
+                  Ambil Tiket
+                </TabsTrigger>
+                <TabsTrigger value="tracker" className="flex items-center">
+                  <Monitor className="mr-2 h-4 w-4" />
+                  Lacak
+                </TabsTrigger>
+                <TabsTrigger value="history" className="flex items-center">
+                  <History className="mr-2 h-4 w-4" />
+                  Riwayat
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="new-ticket">
+                <QueueNumberGenerator />
+              </TabsContent>
+              
+              <TabsContent value="tracker">
+                <TicketTracker />
+              </TabsContent>
+              
+              <TabsContent value="history">
+                <TicketHistory />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </main>
