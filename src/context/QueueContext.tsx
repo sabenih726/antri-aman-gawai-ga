@@ -125,6 +125,7 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'queueServices' || e.key === 'queueCounters' || e.key === 'queueData') {
         // Sync data when localStorage changes in another tab
+        console.log('Storage changed in another tab, syncing...', e.key);
         syncFromStorage();
       }
     };
@@ -135,29 +136,60 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Listen for visibility change to sync when tab becomes active
     const handleVisibilityChange = () => {
       if (!document.hidden) {
+        console.log('Tab became active, syncing data...');
         syncFromStorage();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // Listen for focus events to sync when window regains focus
+    const handleFocus = () => {
+      console.log('Window focused, syncing data...');
+      syncFromStorage();
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    // Listen for custom queue data change events
+    const handleQueueDataChange = (e: CustomEvent) => {
+      console.log('Queue data changed:', e.detail);
+      setTimeout(() => syncFromStorage(), 100); // Small delay to ensure data is written
+    };
+
+    window.addEventListener('queueDataChanged', handleQueueDataChange as EventListener);
+
+    // Periodic sync every 5 seconds as fallback
+    const intervalId = setInterval(() => {
+      syncFromStorage();
+    }, 5000);
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('queueDataChanged', handleQueueDataChange as EventListener);
+      clearInterval(intervalId);
     };
   }, []);
 
   // Save to localStorage whenever data changes
   useEffect(() => {
     localStorage.setItem('queueServices', JSON.stringify(services));
+    // Trigger custom event to notify other tabs
+    window.dispatchEvent(new CustomEvent('queueDataChanged', { detail: { type: 'services' } }));
   }, [services]);
 
   useEffect(() => {
     localStorage.setItem('queueCounters', JSON.stringify(counters));
+    // Trigger custom event to notify other tabs
+    window.dispatchEvent(new CustomEvent('queueDataChanged', { detail: { type: 'counters' } }));
   }, [counters]);
 
   useEffect(() => {
     localStorage.setItem('queueData', JSON.stringify(queue));
+    // Trigger custom event to notify other tabs
+    window.dispatchEvent(new CustomEvent('queueDataChanged', { detail: { type: 'queue' } }));
   }, [queue]);
 
   // Update service waiting counts
