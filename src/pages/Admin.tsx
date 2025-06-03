@@ -20,9 +20,29 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useState, useEffect } from "react";
 
 const Admin = () => {
-  const { counters, clearAllData } = useQueue();
+  const { isAdmin } = useAuth();
+  const { 
+    services, 
+    counters, 
+    queue, 
+    callNext, 
+    completeService, 
+    setCounterStatus, 
+    setCounterService,
+    getAllWaitingTickets,
+    clearAllData
+  } = useQueue();
+
+  const [lastSyncTime, setLastSyncTime] = useState<Date>(new Date());
+
+  // Update sync time when queue data changes
+  useEffect(() => {
+    setLastSyncTime(new Date());
+  }, [queue, services, counters]);
+
   const { logout, getCurrentUser } = useAuth();
   const currentUser = getCurrentUser();
 
@@ -96,6 +116,12 @@ const Admin = () => {
                 </Button>
                 <h1 className="text-xl font-bold text-primary">Panel Admin</h1>
               </div>
+               <div className="md:flex items-center space-x-4">
+            <h1 className="text-xl font-bold text-primary">Panel Admin</h1>
+            <div className="text-sm text-gray-500">
+              Last sync: {lastSyncTime.toLocaleTimeString()}
+            </div>
+          </div>
               <div className="md:flex items-center space-x-4">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>

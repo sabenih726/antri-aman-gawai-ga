@@ -78,6 +78,25 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return defaultValue;
   };
 
+  // Sync data across tabs using storage events
+  const syncFromStorage = () => {
+    const syncedServices = loadFromStorage('queueServices', [
+      { id: "general", name: "Pelayanan Umum", prefix: "A", currentNumber: 0, served: 0, waiting: 0 },
+      { id: "facility", name: "Fasilitas", prefix: "D", currentNumber: 0, served: 0, waiting: 0 },
+    ]);
+    const syncedCounters = loadFromStorage('queueCounters', [
+      { id: 1, name: "Counter 1", status: "active" as const, currentlyServing: null, serviceType: null },
+      { id: 2, name: "Counter 2", status: "active" as const, currentlyServing: null, serviceType: null },
+      { id: 3, name: "Counter 3", status: "inactive" as const, currentlyServing: null, serviceType: null },
+      { id: 4, name: "Counter 4", status: "inactive" as const, currentlyServing: null, serviceType: null },
+    ]);
+    const syncedQueue = loadFromStorage('queueData', []);
+
+    setServices(syncedServices);
+    setCounters(syncedCounters);
+    setQueue(syncedQueue);
+  };
+
   // Initial services
   const [services, setServices] = useState<ServiceType[]>(() =>
     loadFromStorage('queueServices', [
@@ -100,6 +119,33 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [queue, setQueue] = useState<QueueTicket[]>(() =>
     loadFromStorage('queueData', [])
   );
+
+  // Add storage event listener for cross-tab synchronization
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'queueServices' || e.key === 'queueCounters' || e.key === 'queueData') {
+        // Sync data when localStorage changes in another tab
+        syncFromStorage();
+      }
+    };
+
+    // Listen for storage changes from other tabs
+    window.addEventListener('storage', handleStorageChange);
+
+    // Listen for visibility change to sync when tab becomes active
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        syncFromStorage();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   // Save to localStorage whenever data changes
   useEffect(() => {

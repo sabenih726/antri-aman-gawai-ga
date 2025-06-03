@@ -1,13 +1,22 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { LayoutDashboard, Monitor, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Monitor, Settings, LogOut, RefreshCw } from "lucide-react";
 import QueueNumberGenerator from "@/components/QueueNumberGenerator";
 import CurrentServing from "@/components/CurrentServing";
 import { useAuth } from "@/context/AuthContext";
+import { useQueue } from "@/context/QueueContext";
+import { useState, useEffect } from "react";
 
 const Index = () => {
   const { isAdmin, logout } = useAuth();
+  const { queue } = useQueue();
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+
+  // Update last update time when queue changes
+  useEffect(() => {
+    setLastUpdate(new Date());
+  }, [queue]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -22,6 +31,12 @@ const Index = () => {
               className="header-logo" // Menggunakan kelas header-logo dari CSS
             />
             <h1 className="header-title">Sistem Antrian GA</h1>
+          </div>
+
+          {/* Sync indicator */}
+          <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <RefreshCw className="h-4 w-4" />
+            <span>Updated: {lastUpdate.toLocaleTimeString()}</span>
           </div>
 
           {/* Menu kanan */}
