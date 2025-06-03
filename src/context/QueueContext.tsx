@@ -43,6 +43,7 @@ type QueueContextType = {
   getTicketPosition: (ticketId: string) => number | null;
   getAllWaitingTickets: () => QueueTicket[];
   getServiceByPrefix: (prefix: string) => ServiceType | undefined;
+  clearAllData: () => void;
 };
 
 const QueueContext = createContext<QueueContextType | undefined>(undefined);
@@ -56,22 +57,62 @@ export const useQueue = () => {
 };
 
 export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Load data from localStorage or use defaults
+  const loadFromStorage = <T,>(key: string, defaultValue: T): T => {
+    try {
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Convert timestamp strings back to Date objects for queue items
+        if (key === 'queueData' && Array.isArray(parsed)) {
+          return parsed.map(item => ({
+            ...item,
+            timestamp: new Date(item.timestamp)
+          })) as T;
+        }
+        return parsed;
+      }
+    } catch (error) {
+      console.error(`Error loading ${key} from localStorage:`, error);
+    }
+    return defaultValue;
+  };
+
   // Initial services
-  const [services, setServices] = useState<ServiceType[]>([
-    { id: "general", name: "Pelayanan Umum", prefix: "A", currentNumber: 0, served: 0, waiting: 0 },
-    { id: "facility", name: "Fasilitas", prefix: "D", currentNumber: 0, served: 0, waiting: 0 },
-  ]);
+  const [services, setServices] = useState<ServiceType[]>(() =>
+    loadFromStorage('queueServices', [
+      { id: "general", name: "Pelayanan Umum", prefix: "A", currentNumber: 0, served: 0, waiting: 0 },
+      { id: "facility", name: "Fasilitas", prefix: "D", currentNumber: 0, served: 0, waiting: 0 },
+    ])
+  );
 
   // Initial counters
-  const [counters, setCounters] = useState<Counter[]>([
-    { id: 1, name: "Counter 1", status: "active", currentlyServing: null, serviceType: null },
-    { id: 2, name: "Counter 2", status: "active", currentlyServing: null, serviceType: null },
-    { id: 3, name: "Counter 3", status: "inactive", currentlyServing: null, serviceType: null },
-    { id: 4, name: "Counter 4", status: "inactive", currentlyServing: null, serviceType: null },
-  ]);
+  const [counters, setCounters] = useState<Counter[]>(() =>
+    loadFromStorage('queueCounters', [
+      { id: 1, name: "Counter 1", status: "active", currentlyServing: null, serviceType: null },
+      { id: 2, name: "Counter 2", status: "active", currentlyServing: null, serviceType: null },
+      { id: 3, name: "Counter 3", status: "inactive", currentlyServing: null, serviceType: null },
+      { id: 4, name: "Counter 4", status: "inactive", currentlyServing: null, serviceType: null },
+    ])
+  );
 
   // Queue
-  const [queue, setQueue] = useState<QueueTicket[]>([]);
+  const [queue, setQueue] = useState<QueueTicket[]>(() =>
+    loadFromStorage('queueData', [])
+  );
+
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    localStorage.setItem('queueServices', JSON.stringify(services));
+  }, [services]);
+
+  useEffect(() => {
+    localStorage.setItem('queueCounters', JSON.stringify(counters));
+  }, [counters]);
+
+  useEffect(() => {
+    localStorage.setItem('queueData', JSON.stringify(queue));
+  }, [queue]);
 
   // Update service waiting counts
   useEffect(() => {
@@ -222,6 +263,29 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return services.find(service => service.prefix === prefix);
   };
 
+  // Clear all data (for admin reset)
+  const clearAllData = () => {
+    const initialServices = [
+      { id: "general", name: "Pelayanan Umum", prefix: "A", currentNumber: 0, served: 0, waiting: 0 },
+      { id: "facility", name: "Fasilitas", prefix: "D", currentNumber: 0, served: 0, waiting: 0 },
+    ];
+    const initialCounters = [
+      { id: 1, name: "Counter 1", status: "active" as const, currentlyServing: null, serviceType: null },
+      { id: 2, name: "Counter 2", status: "active" as const, currentlyServing: null, serviceType: null },
+      { id: 3, name: "Counter 3", status: "inactive" as const, currentlyServing: null, serviceType: null },
+      { id: 4, name: "Counter 4", status: "inactive" as const, currentlyServing: null, serviceType: null },
+    ];
+
+    setServices(initialServices);
+    setCounters(initialCounters);
+    setQueue([]);
+    
+    // Clear localStorage
+    localStorage.removeItem('queueServices');
+    localStorage.removeItem('queueCounters');
+    localStorage.removeItem('queueData');
+  };
+
   const value = {
     services,
     counters,
@@ -234,7 +298,8 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     getWaitingCount,
     getTicketPosition,
     getAllWaitingTickets,
-    getServiceByPrefix
+    getServiceByPrefix,
+    clearAllData
   };
 
   return <QueueContext.Provider value={value}>{children}</QueueContext.Provider>;

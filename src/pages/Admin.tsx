@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useQueue } from "@/context/QueueContext";
@@ -6,14 +5,30 @@ import CounterCard from "@/components/CounterCard";
 import QueueStats from "@/components/QueueStats";
 import ServiceSelection from "@/components/ServiceSelection";
 import QueueStatistics from "@/components/QueueStatistics";
-import { ArrowLeft, LogOut, LayoutDashboard, Activity, Users, Settings } from "lucide-react";
+import { ArrowLeft, LogOut, LayoutDashboard, Activity, Users, Settings, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const Admin = () => {
-  const { counters } = useQueue();
+  const { counters, clearAllData } = useQueue();
   const { logout, getCurrentUser } = useAuth();
+  const currentUser = getCurrentUser();
+
+  const handleResetData = () => {
+    clearAllData();
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -81,7 +96,32 @@ const Admin = () => {
                 </Button>
                 <h1 className="text-xl font-bold text-primary">Panel Admin</h1>
               </div>
-              <div className="md:hidden">
+              <div className="md:flex items-center space-x-4">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Reset Semua Data
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Reset Semua Data</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Apakah Anda yakin ingin menghapus semua data antrian? Tindakan ini tidak dapat dibatalkan dan akan menghapus:
+                        <br />• Semua nomor antrian
+                        <br />• Status counter
+                        <br />• Statistik layanan
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Batal</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleResetData} className="bg-red-600 hover:bg-red-700">
+                        Ya, Reset Semua
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
                 <Button variant="outline" size="sm" onClick={logout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
@@ -97,18 +137,18 @@ const Admin = () => {
                 <TabsTrigger value="statistics">Statistik</TabsTrigger>
                 <TabsTrigger value="counters">Loket</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="dashboard" className="space-y-6">
                 <QueueStats />
                 <QueueStatistics />
               </TabsContent>
-              
+
               <TabsContent value="statistics" className="space-y-6">
                 <Card className="p-6">
                   <QueueStatistics />
                 </Card>
               </TabsContent>
-              
+
               <TabsContent value="counters" className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div className="space-y-6">
@@ -119,7 +159,7 @@ const Admin = () => {
                       ))}
                     </div>
                   </div>
-                  
+
                   <div className="space-y-6">
                     <h2 className="text-xl font-semibold">Statistik Layanan</h2>
                     <ServiceSelection />
