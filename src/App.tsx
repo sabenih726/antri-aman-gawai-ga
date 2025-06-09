@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,7 +9,7 @@ import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
 import Display from "./pages/Display";
 import NotFound from "./pages/NotFound";
-import { QueueProvider } from "./context/QueueContext";
+import { SupabaseQueueProvider } from "./context/SupabaseQueueContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
@@ -47,7 +48,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <QueueProvider>
+        <SupabaseQueueProvider>
           <TooltipProvider>
             <BrowserRouter>
               <AppRoutes />
@@ -55,7 +56,7 @@ function App() {
               <Sonner />
             </BrowserRouter>
           </TooltipProvider>
-        </QueueProvider>
+        </SupabaseQueueProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

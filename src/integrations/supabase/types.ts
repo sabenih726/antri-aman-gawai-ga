@@ -9,7 +9,137 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      counters: {
+        Row: {
+          created_at: string
+          currently_serving: string | null
+          id: number
+          name: string
+          service_type_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currently_serving?: string | null
+          id: number
+          name: string
+          service_type_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currently_serving?: string | null
+          id?: number
+          name?: string
+          service_type_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "counters_service_type_id_fkey"
+            columns: ["service_type_id"]
+            isOneToOne: false
+            referencedRelation: "service_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queue_tickets: {
+        Row: {
+          called_at: string | null
+          completed_at: string | null
+          counter_assigned: number | null
+          created_at: string
+          customer_name: string | null
+          estimated_wait_time: number | null
+          id: string
+          notes: string | null
+          number: string
+          priority: string
+          purpose: string | null
+          service_type_id: string
+          status: string
+        }
+        Insert: {
+          called_at?: string | null
+          completed_at?: string | null
+          counter_assigned?: number | null
+          created_at?: string
+          customer_name?: string | null
+          estimated_wait_time?: number | null
+          id?: string
+          notes?: string | null
+          number: string
+          priority?: string
+          purpose?: string | null
+          service_type_id: string
+          status?: string
+        }
+        Update: {
+          called_at?: string | null
+          completed_at?: string | null
+          counter_assigned?: number | null
+          created_at?: string
+          customer_name?: string | null
+          estimated_wait_time?: number | null
+          id?: string
+          notes?: string | null
+          number?: string
+          priority?: string
+          purpose?: string | null
+          service_type_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queue_tickets_counter_assigned_fkey"
+            columns: ["counter_assigned"]
+            isOneToOne: false
+            referencedRelation: "counters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "queue_tickets_service_type_id_fkey"
+            columns: ["service_type_id"]
+            isOneToOne: false
+            referencedRelation: "service_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_types: {
+        Row: {
+          created_at: string
+          current_number: number
+          id: string
+          name: string
+          prefix: string
+          served: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_number?: number
+          id?: string
+          name: string
+          prefix: string
+          served?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_number?: number
+          id?: string
+          name?: string
+          prefix?: string
+          served?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

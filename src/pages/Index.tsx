@@ -3,17 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { LayoutDashboard, Monitor, Settings, LogOut, RefreshCw, Ticket, History } from "lucide-react";
-import QueueNumberGenerator from "@/components/QueueNumberGenerator";
+import SupabaseQueueNumberGenerator from "@/components/SupabaseQueueNumberGenerator";
 import CurrentServing from "@/components/CurrentServing";
 import TicketHistory from "@/components/TicketHistory";
 import TicketTracker from "@/components/TicketTracker";
 import { useAuth } from "@/context/AuthContext";
-import { useQueue } from "@/context/QueueContext";
+import { useSupabaseQueueContext } from "@/context/SupabaseQueueContext";
 import { useState, useEffect } from "react";
 
 const Index = () => {
   const { isAdmin, logout } = useAuth();
-  const { queue } = useQueue();
+  const { queue, loading, error } = useSupabaseQueueContext();
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   // Update last update time when queue changes
@@ -21,28 +21,40 @@ const Index = () => {
     setLastUpdate(new Date());
   }, [queue]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-xl">Loading aplikasi antrian...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-xl text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          {/* Flex container untuk gambar dan judul */}
           <div className="flex items-center space-x-4">
-            {/* Gambar logo di pojok kiri */}
             <img
-              src="/images/logo.png" // Pastikan gambar berada di folder public/images
+              src="/images/logo.png"
               alt="Logo"
-              className="header-logo" // Menggunakan kelas header-logo dari CSS
+              className="header-logo"
             />
             <h1 className="header-title">Sistem Antrian GA</h1>
           </div>
 
-          {/* Sync indicator */}
           <div className="flex items-center space-x-2 text-sm text-gray-500">
             <RefreshCw className="h-4 w-4" />
             <span>Updated: {lastUpdate.toLocaleTimeString()}</span>
           </div>
 
-          {/* Menu kanan */}
           <div className="flex space-x-2">
             {isAdmin ? (
               <>
@@ -91,7 +103,6 @@ const Index = () => {
                 <li>Mohon untuk tidak meninggalkan area tunggu ketika menunggu</li>
               </ul>
               
-              {/* Quick Stats */}
               <div className="grid grid-cols-2 gap-4 mt-6">
                 <div className="text-center p-3 bg-blue-50 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">{queue.filter(t => t.status === "waiting").length}</div>
@@ -123,7 +134,7 @@ const Index = () => {
               </TabsList>
               
               <TabsContent value="new-ticket">
-                <QueueNumberGenerator />
+                <SupabaseQueueNumberGenerator />
               </TabsContent>
               
               <TabsContent value="tracker">
